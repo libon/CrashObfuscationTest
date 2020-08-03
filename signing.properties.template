@@ -1,0 +1,4 @@
+AndroidSigningKeyAlias=my-key-alias
+AndroidSigningKeyPassword=my-key-password
+AndroidSigningStoreFile=/path/to/signing/certificate
+AndroidSigningStorePassword=my-store-password
