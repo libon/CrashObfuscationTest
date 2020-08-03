@@ -1,0 +1,69 @@
+configurations {
+    ndkSymbols
+}
+
+dependencies {
+    ndkSymbols ("org.linphone.minimal:linphone-sdk-android:$linphoneVersion")
+    ndkSymbols ("org.linphone.minimal:linphone-sdk-android-debug:$linphoneVersion")
+}
+/**
+ * Copy and extract the debug and release symbols jar from these artifacts:
+ * org.linphone.minimal:linphone-sdk-android-debug:<linphoneVersion>
+ * org.linphone.minimal:linphone-sdk-android:<linphoneVersion>
+ */
+tasks.register("extractNdkSymbols") {
+    outputs.dir file("$buildDir/outputs/ndkSymbols")
+    doLast {
+        // Find all linphone *.so artifacts in the "ndkSymbols" configuration
+        extractNdkSymbols("linphone-sdk-android", "libs")
+        extractNdkSymbols("linphone-sdk-android-debug", "obj/local")
+    }
+}
+
+/**
+ * Extract the linphone release and debug symbols into the libs and obj/local folders, respectively
+ */
+def extractNdkSymbols(artifactName, folder) {
+    def cfg = project.configurations.getByName("ndkSymbols").copyRecursive({it.properties.dependencyProject == null})
+    cfg.resolvedConfiguration.resolvedArtifacts.findAll { artifact ->
+        // We only care about the artifacts with name "liblinphone-ndk"
+        artifact.name == artifactName
+    }.each() { artifact ->
+        copy {
+            into "$buildDir/outputs/ndkSymbols"
+            from(zipTree(artifact.file))
+            include "**/*.so"
+            eachFile { fcd ->
+                def segments = fcd.relativePath.segments.collect { it.replace("jni", folder) } as String[]
+                fcd.relativePath = new RelativePath(true, segments)
+            }
+        }
+    }
+}
+android.buildTypes.all { buildType ->
+    firebaseCrashlytics {
+        // To upload linphone symbols to Crashlytics, run:
+        // ./gradlew uploadCrashlyticsSymbolFile<BuildType>
+        // Ex: ./gradlew uploadCrashlyticsSymbolFileRelease
+        nativeSymbolUploadEnabled true
+        strippedNativeLibsDir "build/outputs/ndkSymbols/libs"
+        unstrippedNativeLibsDir "build/outputs/ndkSymbols/obj"
+    }
+}
+afterEvaluate {
+    android.buildTypes.all { buildType ->
+        // https://firebase.google.com/docs/crashlytics/ndk-reports-new-sdk
+        // The documented task to upload symbols is uploadCrashlyticsSymbolFile{Variant},
+        // however, the symbol files need to be available before the
+        // generateCrashlyticsSymbolFile{Variant} task, which reads the extracted symbol files
+        // and creates *.cSYM files.
+        def extractNdkSymbolsTask = "extractNdkSymbols"
+        tasks.named("generateCrashlyticsSymbolFile${buildType.name.capitalize()}").configure {
+            dependsOn tasks.named(extractNdkSymbolsTask)
+        }
+        tasks.named(extractNdkSymbolsTask).configure {
+            dependsOn tasks.named("compile${buildType.name.capitalize()}Sources")
+        }
+
+    }
+}

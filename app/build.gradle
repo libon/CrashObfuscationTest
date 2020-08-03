@@ -25,15 +25,6 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             // Add this extension
-            firebaseCrashlytics {
-                // Enable processing and uploading of native symbols to Crashlytics
-                // servers. By default, this is disabled to improve build speeds.
-                // This flag must be enabled to see properly-symbolicated native
-                // stack traces in the Crashlytics dashboard.
-                nativeSymbolUploadEnabled true
-                strippedNativeLibsDir "build/outputs/ndkSymbols/libs"
-                unstrippedNativeLibsDir "build/outputs/ndkSymbols/obj"
-            }
         }
     }
 
@@ -62,3 +53,5 @@ repositories {
         url "https://linphone.org/maven_repository/"
     }
 }
+
+apply from: file('crashlytics_ndk_symbols.gradle')
