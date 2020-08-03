@@ -2,6 +2,9 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+// Apply the Crashlytics Gradle plugin
+apply plugin: 'com.google.firebase.crashlytics'
+
 ext.linphoneVersion = "4.4.1-pre.30+0197fa6"
 android {
     compileSdkVersion 29
@@ -21,6 +24,16 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Add this extension
+            firebaseCrashlytics {
+                // Enable processing and uploading of native symbols to Crashlytics
+                // servers. By default, this is disabled to improve build speeds.
+                // This flag must be enabled to see properly-symbolicated native
+                // stack traces in the Crashlytics dashboard.
+                nativeSymbolUploadEnabled true
+                strippedNativeLibsDir "build/outputs/ndkSymbols/libs"
+                unstrippedNativeLibsDir "build/outputs/ndkSymbols/obj"
+            }
         }
     }
 
@@ -38,7 +51,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
     implementation  "org.linphone.minimal:linphone-sdk-android:$linphoneVersion"
+    implementation 'com.google.firebase:firebase-crashlytics-ndk:17.1.1'
 
 }
 
