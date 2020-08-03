@@ -11,6 +11,7 @@ android {
     buildToolsVersion "29.0.3"
 
     defaultConfig {
+        // Make sure the applicationId matches the one in app/src/release/google-services.json
         applicationId "com.example.crashobfuscationtest"
         minSdkVersion 21
         targetSdkVersion 29
@@ -21,6 +22,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Specify a different applicationId or a suffix
+            // so that the applicationId matches the one in app/src/debug/google-services.json
+            // applicationIdSuffix ".test"
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -55,3 +61,4 @@ repositories {
 }
 
 apply from: file('crashlytics_ndk_symbols.gradle')
+apply plugin: 'com.google.gms.google-services'
