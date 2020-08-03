@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+ext.linphoneVersion = "4.4.1-pre.30+0197fa6"
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
@@ -22,6 +23,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    def ndkProperties = new Properties()
+    ndkProperties.load(new FileInputStream("${System.env.ANDROID_HOME}/ndk-bundle/source.properties"))
+    ndkVersion = ndkProperties.get("Pkg.Revision")
 }
 
 dependencies {
@@ -33,5 +38,12 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation  "org.linphone.minimal:linphone-sdk-android:$linphoneVersion"
 
+}
+
+repositories {
+    maven {
+        url "https://linphone.org/maven_repository/"
+    }
 }
