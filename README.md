@@ -38,12 +38,13 @@ Testing
         ```
     - Actual behavior: The crash appears with an empty stacktrace:
         ```
-        Crashed: Thread: SIGSEGV  0x0000000000000000
-               at (Missing)()
-               at (Missing)()
-               at (Missing)()
+        Crashed: Thread #1
+        SIGSEGV 0x0000000000000000
+        0 libc.so (Missing)
+        1 liblinphone.so (Missing)
+        2 base.odex (Missing)
+        3 (Missing)
         ```
-
 
 Workaround
 ----------
